@@ -26,6 +26,7 @@ namespace BookRankReaderConsole
                         Console.WriteLine("Exporting...");
                         Console.WriteLine();
                         readFile();
+
                         break;
                     }
                 case "1":
@@ -34,6 +35,7 @@ namespace BookRankReaderConsole
                         Console.WriteLine("Reading...");
                         Console.WriteLine();
                         readFile();
+
                         getBookRate();
                         break;
                     }
@@ -72,29 +74,46 @@ namespace BookRankReaderConsole
             for (int i = 0; i < str.Length; i++)
             {
                 linkList.Add(str[i]);
+
                 Console.WriteLine(str[i]);
 
             }
             Console.WriteLine();
             Console.WriteLine("Complete!\nTotal: " + linkList.Count);
             //   Console.ReadKey();
-            Main(start);
+           // Main(start);
             //  return linkList;
         }
+        static void writingInCSVMethod(string bookRate)
+        {
+            FileStream fs1 = new FileStream("log.csv", FileMode.Create);
+            StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
+            char delimeter = '\t';
+            writeInCsv.WriteLine("типа название" + delimeter + bookRate);
+
+            writeInCsv.Close();
+            fs1.Close();
+        }
+
         static string[] start;
         static async void getBookRate()
         {
             foreach (var a in linkList)
             {
 
-
+                writingInCSVMethod("13124");
                 string html = "https://www.amazon.com/dp/";
                 html += a;
                 var config = Configuration.Default.WithDefaultLoader();
                 // Load the names of all The Big Bang Theory episodes from Wikipedia
                 var address = html;
-                // Asynchronously get the document in a new context using the configuration
-                var document = await BrowsingContext.New(config).OpenAsync(address);
+                try
+                {
+
+
+                    // Asynchronously get the document in a new context using the configuration
+                    var document = await BrowsingContext.New(config).OpenAsync(address);
+               
                 // This CSS selector gets the desired content
                 var cellSelector = "tr.vevent td:nth-child(3)";
                 cellSelector = "#SalesRank";
@@ -111,20 +130,19 @@ namespace BookRankReaderConsole
 
 
 
-               // textBox2.Text += getNum(titles);
+                // textBox2.Text += getNum(titles);
 
-            
+                
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
 
-
-
-                //foreach (var title in titles)
-                //{
-                //    textBox2.Text += "\n" + getNum(title);
-                //}
             }
 
         }
-      static  string getNum(string input)
+        static string getNum(string input)
         {
             string output;
             string[] temp2;
@@ -141,7 +159,7 @@ namespace BookRankReaderConsole
     {
         public string BookID { get; set; }
         public string Rate { get; set; }
-        
+
 
     }
 }
