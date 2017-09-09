@@ -35,8 +35,8 @@ namespace BookRankReaderConsole
                         Console.WriteLine("Reading...");
                         Console.WriteLine();
                         readFile();
-
-                        getBookRate();
+                        createLink();
+                       // getBookRate();
                         break;
                     }
                 default:
@@ -49,19 +49,7 @@ namespace BookRankReaderConsole
         }
 
         static List<string> linkList = new List<string>();
-        string createLink()
-        {
-            string html;// = "https://www.amazon.com/dp/";
-            // html += textBox1.Text;
-            foreach (var a in linkList)
-            {
-                html = "https://www.amazon.com/dp/";
-                html += a;
-            }
 
-
-            return null;
-        }
 
         static void readFile()
         {
@@ -88,7 +76,7 @@ namespace BookRankReaderConsole
         {
             FileStream fs1 = new FileStream("log.csv", FileMode.Append);
             StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
-            char delimeter = '\t';
+            char delimeter = ';';
             writeInCsv.WriteLine("ISBN" + delimeter + DateTime.Now);
             writeInCsv.WriteLine(bookNum + delimeter + bookRate + delimeter);
 
@@ -98,84 +86,79 @@ namespace BookRankReaderConsole
 
         static string[] start;
         //  static string[] address;
-        static async void getBookRate()
+        static string address = "";
+
+        static string createLink()
         {
+            string address="";
             foreach (var a in linkList)
             {
-
-
                 string html = "https://www.amazon.com/dp/";
                 html += a;
-                var config = Configuration.Default.WithDefaultLoader();
-                // Load the names of all The Big Bang Theory episodes from Wikipedia
-                string address = html.Substring(0, html.Length - 2);
-                //try
-                //{
-
-                //    address = html.Split(new char[] { '\n' });
-                //    if (address.Length <= 1)
-                //    {
-                //        address = html.Split(new char[] { '\r' });
-                //    }
-                //}
-                //catch { }
-
-
-
-
-                // Asynchronously get the document in a new context using the configuration
-                try
-                {
-                    var document = await BrowsingContext.New(config).OpenAsync(address);
-
-
-
-
-                    // This CSS selector gets the desired content
-                    // cellSelector = "tr.vevent td:nth-child(3)";
-                    var cellSelector = "#SalesRank";
-                    // Perform the query to get all cells with the content
-                    // var cells = document.QuerySelectorAll(cellSelector);
-                    var cells = document.QuerySelector(cellSelector);
-                    // We are only interested in the text - select it with LINQ
-                    // var titles = cells.Select(m => m.TextContent);
-                    var titles = cells.TextContent;
-
-                    writingInCSVMethod(getNum(titles), a);
-                }
-                catch (Exception e)
-                {
-
-                    Console.WriteLine(e);
-                    Console.ReadKey();
-                    throw;
-                }
-
-
-                // textBox2.Text += getNum(titles);
-
-
+                address = html.Substring(0, html.Length - 2);
+                getBookRate(address,a);
             }
-
+            return address;
         }
-        static string getNum(string input)
+
+        static async void getBookRate(string address, string nameBook)
         {
-            string output;
-            string[] temp2;
-            string[] temp = input.Split(new char[] { '#' });
-            temp2 = temp[1].Split(new char[] { ' ' });
-            output = temp2[0];
-            return output;
-        }
+            //string address;
+            //foreach (var a in linkList)
+            //{
+            //    string html = "https://www.amazon.com/dp/";
+            //    html += a;
+            //    address = html.Substring(0, html.Length - 2);
+            //}
+
+
+            var config = Configuration.Default.WithDefaultLoader();
+
+            // Asynchronously get the document in a new context using the configuration
+
+            var document = await BrowsingContext.New(config).OpenAsync(address);
+           
+
+
+
+            // This CSS selector gets the desired content
+            // cellSelector = "tr.vevent td:nth-child(3)";
+            var cellSelector = "#SalesRank";
+            // Perform the query to get all cells with the content
+            // var cells = document.QuerySelectorAll(cellSelector);
+            var cells = document.QuerySelector(cellSelector);
+            // We are only interested in the text - select it with LINQ
+            // var titles = cells.Select(m => m.TextContent);
+            var titles = cells.TextContent;
+
+            writingInCSVMethod(getNum(titles), nameBook);
+
+
+
+            // textBox2.Text += getNum(titles);
+
+
+        
 
     }
-
-
-    class BookModel
+    static string getNum(string input)
     {
-        public string BookID { get; set; }
-        public string Rate { get; set; }
-
-
+        string output;
+        string[] temp2;
+        string[] temp = input.Split(new char[] { '#' });
+        temp2 = temp[1].Split(new char[] { ' ' });
+        output = temp2[0];
+        return output;
     }
+
+}
+
+
+class BookModel
+{
+    public string BookID { get; set; }
+    public string Rate { get; set; }
+
+
+}
 }
