@@ -89,14 +89,15 @@ namespace BookRankReaderConsole
             FileStream fs1 = new FileStream("log.csv", FileMode.Append);
             StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
             char delimeter = '\t';
-            writeInCsv.WriteLine(bookNum + delimeter + bookRate);
+            writeInCsv.WriteLine("ISBN" + delimeter + DateTime.Now);
+            writeInCsv.WriteLine(bookNum + delimeter + bookRate + delimeter);
 
             writeInCsv.Close();
             fs1.Close();
         }
 
         static string[] start;
-      //  static string[] address;
+        //  static string[] address;
         static async void getBookRate()
         {
             foreach (var a in linkList)
@@ -107,7 +108,7 @@ namespace BookRankReaderConsole
                 html += a;
                 var config = Configuration.Default.WithDefaultLoader();
                 // Load the names of all The Big Bang Theory episodes from Wikipedia
-                string address=html.Substring(0,html.Length-2);
+                string address = html.Substring(0, html.Length - 2);
                 //try
                 //{
 
@@ -127,20 +128,20 @@ namespace BookRankReaderConsole
                 {
                     var document = await BrowsingContext.New(config).OpenAsync(address);
 
-             
-              
 
-                // This CSS selector gets the desired content
-                var cellSelector = "tr.vevent td:nth-child(3)";
-                cellSelector = "#SalesRank";
-                // Perform the query to get all cells with the content
-                // var cells = document.QuerySelectorAll(cellSelector);
-                var cells = document.QuerySelector(cellSelector);
-                // We are only interested in the text - select it with LINQ
-                // var titles = cells.Select(m => m.TextContent);
-                var titles = cells.TextContent;
 
-                writingInCSVMethod(getNum(titles), a);
+
+                    // This CSS selector gets the desired content
+                    // cellSelector = "tr.vevent td:nth-child(3)";
+                    var cellSelector = "#SalesRank";
+                    // Perform the query to get all cells with the content
+                    // var cells = document.QuerySelectorAll(cellSelector);
+                    var cells = document.QuerySelector(cellSelector);
+                    // We are only interested in the text - select it with LINQ
+                    // var titles = cells.Select(m => m.TextContent);
+                    var titles = cells.TextContent;
+
+                    writingInCSVMethod(getNum(titles), a);
                 }
                 catch (Exception e)
                 {
@@ -149,7 +150,7 @@ namespace BookRankReaderConsole
                     Console.ReadKey();
                     throw;
                 }
-               
+
 
                 // textBox2.Text += getNum(titles);
 
