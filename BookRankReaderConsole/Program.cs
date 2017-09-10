@@ -70,9 +70,9 @@ namespace BookRankReaderConsole
             }
             Console.WriteLine();
             Console.WriteLine("Complete!\nTotal: " + linkList.Count);
-            //   Console.ReadKey();
+
             Main(start);
-            //  return linkList;
+
         }
 
         static bool printHeader = true;
@@ -86,24 +86,17 @@ namespace BookRankReaderConsole
                 writeInCsv.WriteLine("ISBN" + delimeter + DateTime.Now);
                 printHeader = false;
             }
-            
+
             writeInCsv.WriteLine(bookNum + delimeter + bookRate + delimeter);
             writeInCsv.Close();
             fs1.Close();
-            //if (lastBook)
-            //{
-            //    Console.WriteLine("Last book reached");
-            //    Console.WriteLine("Export complete");
-               
-            //    Main(start);
 
-            //}
-            
+
         }
 
-         static bool lastBook = false;
+        static bool lastBook = false;
         static string[] start;
-        //  static string[] address;
+      
         static string address = "";
 
         static string createLink()
@@ -133,99 +126,43 @@ namespace BookRankReaderConsole
         static async Task<string> GetDocumentAsync(string address)
         {
             var config = Configuration.Default.WithDefaultLoader();
-
-            // Asynchronously get the document in a new context using the configuration
-
             var document = await BrowsingContext.New(config).OpenAsync(address);
-
-
-
-
-            // This CSS selector gets the desired content
-            // cellSelector = "tr.vevent td:nth-child(3)";
             var cellSelector = "#SalesRank";
-            // Perform the query to get all cells with the content
-            // var cells = document.QuerySelectorAll(cellSelector);
             var cells = document.QuerySelector(cellSelector);
-            // We are only interested in the text - select it with LINQ
-            // var titles = cells.Select(m => m.TextContent);
             var titles = cells.TextContent;
             return titles;
         }
 
         static async void getBookRate(string address, string nameBook)
         {
-            //string address;
-            //foreach (var a in linkList)
-            //{
-            //    string html = "https://www.amazon.com/dp/";
-            //    html += a;
-            //    address = html.Substring(0, html.Length - 2);
-            //}
-
-
-            //var config = Configuration.Default.WithDefaultLoader();
-
-            //// Asynchronously get the document in a new context using the configuration
-
-            //var document = await BrowsingContext.New(config).OpenAsync(address);
-
-
-
-
-            //// This CSS selector gets the desired content
-            //// cellSelector = "tr.vevent td:nth-child(3)";
-            //var cellSelector = "#SalesRank";
-            //// Perform the query to get all cells with the content
-            //// var cells = document.QuerySelectorAll(cellSelector);
-            //var cells = document.QuerySelector(cellSelector);
-            //// We are only interested in the text - select it with LINQ
-            //// var titles = cells.Select(m => m.TextContent);
-            //var titles = cells.TextContent;
-            /* Task t = */
-            string t="";
+            string t = "";
             try
             {
                 t = GetDocumentAsync(address).GetAwaiter().GetResult();
             }
             catch
             {
-                Console.WriteLine("Book not found! ("+nameBook+")"); }
-            //t = GetDocumentAsync(address).GetAwaiter().GetResult();
-            //t.Wait();
-
+                Console.WriteLine("Book not found! (" + nameBook + ")");
+            }
             writingInCSVMethod(getNum(t), nameBook);
-
-
-
-            // textBox2.Text += getNum(titles);
-
-
-
-
         }
         static string getNum(string input)
         {
-            string output="";
+            string output = "";
             string[] temp2;
             try
             {
-                
+
                 string[] temp = input.Split(new char[] { '#' });
                 temp2 = temp[1].Split(new char[] { ' ' });
                 output = temp2[0];
                 output = output.Replace(',', '.');
             }
-            catch 
+            catch
             {
-             
+
             }
-            //string output;
-            //string[] temp2;
-            //string[] temp = input.Split(new char[] { '#' });
-            //temp2 = temp[1].Split(new char[] { ' ' });
-            //output = temp2[0];
-            return output;
+           return output;
         }
 
     }
