@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AngleSharp;
+using AngleSharp.Dom;
 
 namespace BookRankReaderConsole
 {
@@ -25,7 +26,7 @@ namespace BookRankReaderConsole
                         Console.WriteLine();
                         Console.WriteLine("Exporting...");
                         Console.WriteLine();
-                        readFile();
+                        //   readFile();
 
                         break;
                     }
@@ -35,8 +36,9 @@ namespace BookRankReaderConsole
                         Console.WriteLine("Reading...");
                         Console.WriteLine();
                         readFile();
-
-                        getBookRate();
+                        createLink();
+                        // getBookRate();
+                        printHeader = true;
                         break;
                     }
                 default:
@@ -49,19 +51,7 @@ namespace BookRankReaderConsole
         }
 
         static List<string> linkList = new List<string>();
-        string createLink()
-        {
-            string html;// = "https://www.amazon.com/dp/";
-            // html += textBox1.Text;
-            foreach (var a in linkList)
-            {
-                html = "https://www.amazon.com/dp/";
-                html += a;
-            }
 
-
-            return null;
-        }
 
         static void readFile()
         {
@@ -80,76 +70,99 @@ namespace BookRankReaderConsole
             }
             Console.WriteLine();
             Console.WriteLine("Complete!\nTotal: " + linkList.Count);
-            //   Console.ReadKey();
-            Main(start);
-            //  return linkList;
-        }
-        static void writingInCSVMethod(string bookRate)
-        {
-            FileStream fs1 = new FileStream("log.csv", FileMode.Create);
-            StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
-            char delimeter = '\t';
-            writeInCsv.WriteLine("типа название" + delimeter + bookRate);
 
+            Main(start);
+
+        }
+
+        static bool printHeader = true;
+        static void writingInCSVMethod(string bookRate, string bookNum)
+        {
+            FileStream fs1 = new FileStream("export.csv", FileMode.Append);
+            StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
+            char delimeter = ',';
+            if (printHeader)
+            {
+                writeInCsv.WriteLine("ISBN" + delimeter + DateTime.Now);
+                printHeader = false;
+            }
+
+            writeInCsv.WriteLine(bookNum + delimeter + bookRate + delimeter);
             writeInCsv.Close();
             fs1.Close();
+
+
         }
 
+        static bool lastBook = false;
         static string[] start;
-        static async void getBookRate()
+      
+        static string address = "";
+
+        static string createLink()
         {
+            string address = "";
+            int cnt = 0;
             foreach (var a in linkList)
             {
-
-                writingInCSVMethod("13124");
+                cnt++;
                 string html = "https://www.amazon.com/dp/";
                 html += a;
-                var config = Configuration.Default.WithDefaultLoader();
-                // Load the names of all The Big Bang Theory episodes from Wikipedia
-                var address = html;
-                try
+                address = html.Substring(0, html.Length - 2);
+                getBookRate(address, a.Substring(0, a.Length - 2));
+                if (cnt == linkList.Count)
                 {
+                    //lastBook = true;
+                    Console.WriteLine("Last book reached");
+                    Console.WriteLine("Export complete");
 
-
-                    // Asynchronously get the document in a new context using the configuration
-                    var document = await BrowsingContext.New(config).OpenAsync(address);
-               
-                // This CSS selector gets the desired content
-                var cellSelector = "tr.vevent td:nth-child(3)";
-                cellSelector = "#SalesRank";
-                // Perform the query to get all cells with the content
-                // var cells = document.QuerySelectorAll(cellSelector);
-                var cells = document.QuerySelector(cellSelector);
-                // We are only interested in the text - select it with LINQ
-                // var titles = cells.Select(m => m.TextContent);
-                var titles = cells.TextContent;
-
-
-
-                //ТУТ ГОТОВОЕ ЧИСЛО, но с ЗАПЯТЫМИ, вроде они не мешают
-
-
-
-                // textBox2.Text += getNum(titles);
-
-                
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
+                    Main(start);
                 }
 
             }
+            return address;
+        }
 
+        static async Task<string> GetDocumentAsync(string address)
+        {
+            var config = Configuration.Default.WithDefaultLoader();
+            var document = await BrowsingContext.New(config).OpenAsync(address);
+            var cellSelector = "#SalesRank";
+            var cells = document.QuerySelector(cellSelector);
+            var titles = cells.TextContent;
+            return titles;
+        }
+
+        static async void getBookRate(string address, string nameBook)
+        {
+            string t = "";
+            try
+            {
+                t = GetDocumentAsync(address).GetAwaiter().GetResult();
+            }
+            catch
+            {
+                Console.WriteLine("Book not found! (" + nameBook + ")");
+            }
+            writingInCSVMethod(getNum(t), nameBook);
         }
         static string getNum(string input)
         {
-            string output;
+            string output = "";
             string[] temp2;
-            string[] temp = input.Split(new char[] { '#' });
-            temp2 = temp[1].Split(new char[] { ' ' });
-            output = temp2[0];
-            return output;
+            try
+            {
+
+                string[] temp = input.Split(new char[] { '#' });
+                temp2 = temp[1].Split(new char[] { ' ' });
+                output = temp2[0];
+                output = output.Replace(',', '.');
+            }
+            catch
+            {
+
+            }
+           return output;
         }
 
     }
