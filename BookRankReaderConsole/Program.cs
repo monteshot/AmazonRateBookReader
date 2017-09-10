@@ -38,6 +38,7 @@ namespace BookRankReaderConsole
                         readFile();
                         createLink();
                         // getBookRate();
+                        printHeader = true;
                         break;
                     }
                 default:
@@ -73,18 +74,34 @@ namespace BookRankReaderConsole
             Main(start);
             //  return linkList;
         }
+
+        static bool printHeader = true;
         static void writingInCSVMethod(string bookRate, string bookNum)
         {
-            FileStream fs1 = new FileStream("log.csv", FileMode.Append);
+            FileStream fs1 = new FileStream("export.csv", FileMode.Append);
             StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
-            char delimeter = ';';
-            writeInCsv.WriteLine("ISBN" + delimeter + DateTime.Now);
+            char delimeter = ',';
+            if (printHeader)
+            {
+                writeInCsv.WriteLine("ISBN" + delimeter + DateTime.Now);
+                printHeader = false;
+            }
+            
             writeInCsv.WriteLine(bookNum + delimeter + bookRate + delimeter);
-
             writeInCsv.Close();
             fs1.Close();
+            //if (lastBook)
+            //{
+            //    Console.WriteLine("Last book reached");
+            //    Console.WriteLine("Export complete");
+               
+            //    Main(start);
+
+            //}
+            
         }
 
+         static bool lastBook = false;
         static string[] start;
         //  static string[] address;
         static string address = "";
@@ -92,12 +109,23 @@ namespace BookRankReaderConsole
         static string createLink()
         {
             string address = "";
+            int cnt = 0;
             foreach (var a in linkList)
             {
+                cnt++;
                 string html = "https://www.amazon.com/dp/";
                 html += a;
                 address = html.Substring(0, html.Length - 2);
                 getBookRate(address, a.Substring(0, a.Length - 2));
+                if (cnt == linkList.Count)
+                {
+                    //lastBook = true;
+                    Console.WriteLine("Last book reached");
+                    Console.WriteLine("Export complete");
+
+                    Main(start);
+                }
+
             }
             return address;
         }
@@ -160,7 +188,9 @@ namespace BookRankReaderConsole
             {
                 t = GetDocumentAsync(address).GetAwaiter().GetResult();
             }
-            catch { }
+            catch
+            {
+                Console.WriteLine("Book not found! ("+nameBook+")"); }
             //t = GetDocumentAsync(address).GetAwaiter().GetResult();
             //t.Wait();
 
