@@ -54,6 +54,7 @@ namespace BookRankReaderConsole
 
         static List<string> linkList = new List<string>();
         static List<string> tempList = new List<string>();
+        static List<string> changedList = new List<string>();
 
 
         static void readFile()
@@ -71,6 +72,7 @@ namespace BookRankReaderConsole
                 {
                     str1 = rd.ReadToEnd().Split(str1, StringSplitOptions.RemoveEmptyEntries);
                 }
+                
             }
             catch
             {
@@ -164,11 +166,8 @@ namespace BookRankReaderConsole
 
         static string address = "";
 
-        static string createLink()
-        {
-           FileStream fs1 = new FileStream("export.csv", FileMode.Create);
-            StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
-
+        static void createLink()
+        {   changedList.Add("Header");
             string address = "";
             int cnt = 0;
 
@@ -179,10 +178,17 @@ namespace BookRankReaderConsole
                 string html = "https://www.amazon.com/dp/";
                 html += a;
                 address = html.Substring(0, html.Length - 2);
-                if (tempList != null)
+                if (tempList.Count>1)
                 {
                     var b = tempList.Single(m => m.Contains(a.Substring(0, a.Length - 2)));
+
+
+                    b = b.Substring(0, b.Length - 2);
+                    b += ",";
                     b += getBookRate(address, a.Substring(0, a.Length - 2));
+                    
+                    //b = b.Substring(0, b.Length - 2);
+                    changedList.Add(b);
                 }
                 else
                 {
@@ -201,14 +207,18 @@ namespace BookRankReaderConsole
 
             }
 
-            //foreach (var row in tempList)
-            //{
-            //    writeInCsv.WriteLine(row);
-            //}
+            FileStream fs1 = new FileStream("export.csv", FileMode.Create);
+            StreamWriter writeInCsv = new StreamWriter(fs1, Encoding.Unicode);
+
+
+            foreach (var row in changedList)
+            {
+                writeInCsv.WriteLine(row);
+            }
 
             writeInCsv.Close();
             fs1.Close();
-            return address;
+            
         }
 
         static async Task<string> GetDocumentAsync(string address)
