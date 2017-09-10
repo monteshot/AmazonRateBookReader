@@ -81,7 +81,7 @@ namespace BookRankReaderConsole
             Console.WriteLine();
             Console.WriteLine("Complete!\nTotal: " + linkList.Count);
             //   Console.ReadKey();
-           // Main(start);
+            Main(start);
             //  return linkList;
         }
         static void writingInCSVMethod(string bookRate)
